@@ -1,18 +1,14 @@
 import { db } from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
+import type { KeywordResult } from "@/lib/keyword-research/types";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type KeywordResult = {
-  keyword: string;
-  volume: number | null;
-  difficulty: number | null;
-  cpc: number | null;
-  competition: number | null;
-  trend: number[] | null; // monthly search volume trend
-};
+// `KeywordResult` now lives in lib/keyword-research/types.ts (shared across
+// providers) — re-exported here for backwards compatibility.
+export type { KeywordResult };
 
 export type DomainOverviewResult = {
   organicKeywords: number;

@@ -24,6 +24,7 @@ model User {
   sites         Site[]
   alerts        Alert[]
   apiKeys       ApiKey[]
+  settings      UserSettings?
 }
 
 model Account {
@@ -76,6 +77,53 @@ model ApiKey {
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, provider])
+}
+
+// ============ USER SETTINGS ============
+// General per-user settings table (not specific to keyword research) —
+// further agent/SEO settings get added as new typed columns with defaults
+// (additive migrations, no backfill needed). Row is created lazily (upsert)
+// on first write; missing row = defaults. See lib/user-settings.ts.
+
+model UserSettings {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  keywordCacheTtlDays Int      @default(7)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============ KEYWORD RESEARCH: KEYWORD TOOL QUOTA + CACHE ============
+// Keyword Tool's free guest MCP rate limit (60/h, 120/day) is almost
+// certainly enforced per source IP, i.e. shared with any other MCP client
+// on this host/network — a local counter would drift, so
+// `keywordtool-quota-guest` (itself free, doesn't consume the limit) is the
+// single source of truth. This table is a singleton (id="guest") caching
+// the last-known quota state returned by that call.
+
+model KeywordToolQuota {
+  id              String    @id @default("guest")
+  hourlyRemaining Int?
+  dailyRemaining  Int?
+  hourlyQuota     Int?
+  dailyQuota      Int?
+  // Set ONLY from `quota_resets_at` in a `rate_limit_reached` response —
+  // NOT a general quota reset time. Normal quota responses don't include a
+  // reset timestamp, so this is usually null.
+  blockedUntil    DateTime?
+  fetchedAt       DateTime  @default(now())
+}
+
+model KeywordResearchCache {
+  id        String   @id @default(cuid())
+  cacheKey  String   @unique
+  provider  String
+  response  Json
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // ============ SITES ============

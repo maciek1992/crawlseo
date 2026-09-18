@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { DeleteSiteButton } from "@/components/sites/delete-site-button";
 import { ApiKeysSection } from "@/components/settings/api-keys-section";
+import { KeywordResearchSection } from "@/components/settings/keyword-research-section";
+import { getUserSettings } from "@/lib/user-settings";
 
 interface Props {
   params: Promise<{ siteId: string }>;
@@ -49,6 +51,8 @@ export default async function SettingsPage({ params }: Props) {
     };
   }
 
+  const userSettings = await getUserSettings(session.user.id);
+
   return (
     <div>
       <PageHeader
@@ -89,6 +93,9 @@ export default async function SettingsPage({ params }: Props) {
 
         {/* External API Keys */}
         <ApiKeysSection initialStatus={apiKeyStatus} />
+
+        {/* Keyword Research cache */}
+        <KeywordResearchSection initialTtlDays={userSettings.keywordCacheTtlDays} />
 
         {/* Data summary */}
         <div className="panel p-5">
