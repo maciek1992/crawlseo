@@ -31,7 +31,11 @@ export default async function VitalsPage({ params }: Props) {
       <PageHeader
         eyebrow={site.domain}
         title="Core Web Vitals"
-        description="PageSpeed Insights lab data for your top pages · set GOOGLE_PAGESPEED_KEY for higher quota"
+        description={
+          process.env.GOOGLE_PAGESPEED_KEY
+            ? "PageSpeed Insights lab data for your top pages"
+            : "PageSpeed Insights lab data for your top pages · set GOOGLE_PAGESPEED_KEY for higher quota"
+        }
         actions={<VitalsButton siteId={siteId} />}
       />
 
