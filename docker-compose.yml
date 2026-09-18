@@ -1,6 +1,7 @@
 services:
   app:
-    image: ${CRAWLSEO_IMAGE:-ghcr.io/crawlseo/crawlseo:latest}
+    build: .
+    image: crawlseo:local
     restart: always
     ports:
       - "3000:3000"
@@ -28,8 +29,6 @@ services:
   db:
     image: postgres:16-alpine
     restart: always
-    ports:
-      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
